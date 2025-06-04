@@ -227,64 +227,194 @@ const ScratchChatbot: React.FC = () => {
     
       const systemPrompt = `Hi! I'm your friendly Scratch helper! 🐱
 
-      I'm a specialized assistant focused exclusively on Scratch programming. I can help you with:
-      - Scratch blocks and scripts
-      - Sprite actions and costumes
-      - Stage and backdrop features
-      - Scratch game development
-      - Basic programming concepts in Scratch
-      
-      When I show Scratch blocks, I’ll format them like this:
-      
-      🔵 Motion Blocks:
-      [when green flag clicked ▶️]
-      [move (10) steps]
-      
-      🟣 Looks Blocks:
-      [say [Hello!] for (2) seconds]
-      [switch costume to (costume1)]
-      
-      💖 Sound Blocks:
-      [play sound (Meow) until done]
-      
-      💛 Events Blocks:
-      [when (space) key pressed]
-      
-      🟧 Control Blocks:
-      [forever]
-      [if <touching (mouse-pointer)?> then]
-      
-      🔍 Sensing Blocks:
-      <touching color [#FF0000]?>
-      
-      💚 Operators Blocks:
-      ((2) + (2))
-      <(my variable) > (50)>
-      
-      📦 Variables:
-      (my variable)
-      [set [my variable] to (0)]
-      
-      Important:
-      - I only answer questions about Scratch programming.
-      - If you ask about other topics, I’ll kindly remind you to keep questions Scratch-related.
-      
-      Please ask your Scratch question clearly and simply.
+I'm a specialized assistant focused exclusively on Scratch programming. I can help you with:
+- Scratch blocks and scripts
+- Sprite actions and costumes  
+- Stage and backdrop features
+- Scratch game development
+- Basic programming concepts in Scratch
 
-      Previous conversation:
-${conversationHistory}
+When I show Scratch blocks, I'll format them like this:
+
+🟦 MOTION BLOCKS:
+\`when green flag clicked\`
+\`move (10) steps\`
+\`turn right (15) degrees\`
+\`turn left (15) degrees\`
+\`point in direction (90)\`
+\`point towards (mouse-pointer)\`
+\`go to x: (0) y: (0)\`
+\`go to (mouse-pointer)\`
+\`glide (1) secs to x: (0) y: (0)\`
+\`change x by (10)\`
+\`set x to (0)\`
+\`change y by (10)\`
+\`set y to (0)\`
+\`if on edge, bounce\`
+\`set rotation style [left-right]\`
+\`(x position)\`
+\`(y position)\`
+\`(direction)\`
+
+🟣 LOOKS BLOCKS:
+\`say [Hello!] for (2) seconds\`
+\`say [Hello!]\`
+\`think [Hmm...] for (2) seconds\`
+\`think [Hmm...]\`
+\`switch costume to (costume1)\`
+\`next costume\`
+\`switch backdrop to (backdrop1)\`
+\`change [color] effect by (25)\`
+\`set [color] effect to (0)\`
+\`clear graphic effects\`
+\`change size by (10)\`
+\`set size to (100)%\`
+\`show\`
+\`hide\`
+\`go to [front] layer\`
+\`go [forward] (1) layers\`
+\`(costume [number])\`
+\`(backdrop [number])\`
+\`(size)\`
+
+🟪 SOUND BLOCKS:
+\`play sound (Meow) until done\`
+\`start sound (Meow)\`
+\`stop all sounds\`
+\`change [pitch] effect by (10)\`
+\`set [pitch] effect to (100)\`
+\`clear sound effects\`
+\`change volume by (-10)\`
+\`set volume to (100)%\`
+\`(volume)\`
+
+🟨 EVENT BLOCKS:
+\`when green flag clicked\`
+\`when [space] key pressed\`
+\`when this sprite clicked\`
+\`when backdrop switches to [backdrop1]\`
+\`when [loudness] > (10)\`
+\`when I receive [message1]\`
+\`broadcast [message1]\`
+\`broadcast [message1] and wait\`
+
+🟧 CONTROL BLOCKS:
+\`wait (1) seconds\`
+\`repeat (10)\`
+\`forever\`
+\`if <> then\`
+\`if <> then\`
+\`else\`
+\`wait until <>\`
+\`repeat until <>\`
+\`stop [all]\`
+\`when I start as a clone\`
+\`create clone of [myself]\`
+\`delete this clone\`
+
+🟢 SENSING BLOCKS:
+\`<touching (mouse-pointer)?>\`
+\`<touching color [#0000FF]?>\`
+\`<color [#FF0000] is touching [#0000FF]?>\`
+\`(distance to (mouse-pointer))\`
+\`ask [What's your name?] and wait\`
+\`(answer)\`
+\`<key (space) pressed?>\`
+\`<mouse down?>\`
+\`(mouse x)\`
+\`(mouse y)\`
+\`(loudness)\`
+\`(timer)\`
+\`reset timer\`
+\`([x position] of (Sprite1))\`
+\`(current [minute])\`
+\`(days since 2000)\`
+\`(username)\`
+
+🔵 OPERATORS BLOCKS:
+\`(()) + (()))\`
+\`(()) - (()))\`
+\`(()) * (()))\`
+\`(()) / (()))\`
+\`(pick random (1) to (10))\`
+\`<() > ()>\`
+\`<() < ()>\`
+\`<() = ()>\`
+\`<() and ()>\`
+\`<() or ()>\`
+\`<not <>>\`
+\`(join [apple] [banana])\`
+\`(letter (1) of [world])\`
+\`(length of [world])\`
+\`<[apple] contains [a]?>\`
+\`(() mod ())\`
+\`(round ())\`
+\`([abs] of ())\`
+
+🟠 VARIABLES BLOCKS:
+\`set [my variable] to (0)\`
+\`change [my variable] by (1)\`
+\`show variable [my variable]\`
+\`hide variable [my variable]\`
+\`(my variable)\`
+
+🔴 LIST BLOCKS:
+\`add [thing] to [list]\`
+\`delete (1) of [list]\`
+\`delete all of [list]\`
+\`insert [thing] at (1) of [list]\`
+\`replace item (1) of [list] with [thing]\`
+\`(item (1) of [list])\`
+\`(item # of [thing] in [list])\`
+\`(length of [list])\`
+\`<[list] contains [thing]?>\`
+\`show list [list]\`
+\`hide list [list]\`
+
+🖌️ PEN BLOCKS (Extension):
+\`erase all\`
+\`stamp\`
+\`pen down\`
+\`pen up\`
+\`set pen color to [#FF0000]\`
+\`change pen color by (10)\`
+\`set pen color to (50)\`
+\`change pen shade by (10)\`
+\`set pen shade to (50)\`
+\`change pen size by (1)\`
+\`set pen size to (1)\`
+
+🎵 MUSIC BLOCKS (Extension):
+\`play note (60) for (0.5) beats\`
+\`rest for (0.25) beats\`
+\`play drum (1) for (0.25) beats\`
+\`set instrument to (1)\`
+\`set tempo to (60)\`
+\`change tempo by (20)\`
+\`(tempo)\`
+
+Important:
+- I only answer questions about Scratch programming.
+- If you ask about other topics, I'll kindly remind you to keep questions Scratch-related.
+- I'll always provide step-by-step instructions for complex projects.
+- I'll suggest creative ideas to make projects more fun and engaging.
+
+Please ask your Scratch question clearly and simply.
+
+Previous conversation: ${conversationHistory}
       
-      Your Scratch question: ${userMessage}
-      
-      Instructions for AI:
-      1. Only respond to Scratch programming questions.
-      2. For non-Scratch questions, reply:
-         "I'm your Scratch helper! I can only answer questions about Scratch programming. Would you like to learn about making games, animations, or other fun projects in Scratch?"
-      3. Always use block formatting when showing Scratch code examples.
-      4. Keep explanations simple, clear, and beginner-friendly.
-      5. Use emojis matching block colors for code examples.
-      6. Encourage and motivate users to have fun with Scratch! 🎉
-      `;
+Your Scratch question: ${userMessage}
+
+Instructions for AI:
+1. Only respond to Scratch programming questions.
+2. For non-Scratch questions, reply: "I'm your Scratch helper! I can only answer questions about Scratch programming. Would you like to learn about making games, animations, or other fun projects in Scratch?"
+3. Always wrap Scratch blocks in backticks for proper color coding.
+4. Keep explanations simple, clear, and beginner-friendly.
+5. Use emojis matching block colors for section headers.
+6. Provide complete, working examples when possible.
+7. Encourage creativity and experimentation.
+8. Always end with a motivating message! 🎉
+`;
   
       const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
@@ -458,40 +588,220 @@ ${conversationHistory}
 >
   <div className={message.sender === 'bot' ? 'markdown-body' : ''}>
     {message.sender === 'bot' ? (
-      <ReactMarkdown 
-        remarkPlugins={[remarkGfm]}
-        components={{
-          code({ node, className, children, ...props }: React.HTMLAttributes<HTMLElement> & { node?: any; inline?: boolean }) {
-            const match = /language-(\w+)/.exec(className || '');
-            const blockType = match ? match[1] : '';
-            const isBlock = blockType !== '';
+      // Enhanced ReactMarkdown component with Scratch block detection
+// Comprehensive ReactMarkdown component with complete Scratch block detection
+// Enhanced ReactMarkdown with improved block formatting
+// Enhanced ReactMarkdown with improved block formatting
+// Updated React component with proper block stacking
+<ReactMarkdown
+  remarkPlugins={[remarkGfm]}
+  components={{
+    code({ inline, className, children, ...props }: React.HTMLAttributes<HTMLElement> & { inline?: boolean; className?: string; children?: React.ReactNode }) {
+      const codeText = String(children).toLowerCase().trim();
+      
+      // Enhanced block detection function - checks specific patterns before general ones
+      const detectBlockType = (text: string): string | null => {
+        // Remove common punctuation and numbers for better detection
+        const cleanText: string = text.replace(/[()[\]<>]/g, ' ').replace(/\d+/g, '').replace(/\s+/g, ' ').trim();
+        
+        // Events blocks - most specific patterns first
+        if (text.includes('when green flag clicked')) return 'events';
+        if (text.includes('when') && (text.includes('key pressed') || text.includes('clicked') || text.includes('backdrop switches'))) return 'events';
+        if (text.includes('broadcast') || text.includes('receive')) return 'events';
+        
+        // Motion blocks - CHECK THESE BEFORE CONTROL BLOCKS!
+        if (text.includes('move') && text.includes('steps')) return 'motion';
+        if (text.includes('turn') && (text.includes('degrees') || text.includes('right') || text.includes('left'))) return 'motion';
+        if (text.includes('go to') || text.includes('glide') || text.includes('point')) return 'motion';
+        if (text.includes('change x') || text.includes('change y') || text.includes('set x') || text.includes('set y')) return 'motion';
+        if (text.includes('x position') || text.includes('y position') || text.includes('direction')) return 'motion';
+        
+        // FIXED: Check for specific motion blocks that contain "if" before general control detection
+        if (text.includes('if on edge') && text.includes('bounce')) return 'motion';
+        if (text.includes('bounce') && !text.includes('when')) return 'motion';
+        
+        // Control structures - now checked AFTER motion-specific patterns
+        if (text.includes('forever') || text.includes('repeat') || text.includes('repeat until')) return 'control';
+        if (cleanText.includes('if ') && !text.includes('bounce')) return 'control';
+        if (text.includes('else') || text.includes('wait')) return 'control';
+        if (text.includes('stop') && (text.includes('all') || text.includes('script'))) return 'control';
+        if (text.includes('end')) return 'control';
+        
+        // Looks blocks
+        if ((text.includes('say') || text.includes('think')) && (text.includes('for') || text.includes('seconds'))) return 'looks';
+        if (text.includes('show') || text.includes('hide')) return 'looks';
+        if (text.includes('switch costume') || text.includes('next costume') || text.includes('costume')) return 'looks';
+        if (text.includes('switch backdrop') || text.includes('next backdrop') || text.includes('backdrop')) return 'looks';  
+        if (text.includes('change size') || text.includes('set size') || text.includes('change effect') || text.includes('set effect')) return 'looks';
+        
+        // Sound blocks
+        if (text.includes('play sound') || text.includes('start sound') || (text.includes('stop') && text.includes('sound'))) return 'sound';
+        if (text.includes('change volume') || text.includes('set volume') || text.includes('volume')) return 'sound';
+        
+        // Sensing blocks
+        if (text.includes('touching') || text.includes('distance') || text.includes('ask') || text.includes('answer')) return 'sensing';
+        if (text.includes('key pressed') && !text.includes('when')) return 'sensing';
+        if (text.includes('mouse') || text.includes('loudness') || text.includes('timer')) return 'sensing';
+        
+        // Variables and lists - be more specific
+        if ((text.includes('set') && text.includes('to')) && !text.includes('effect') && !text.includes('volume') && !text.includes('go to')) return 'variables';
+        if (text.includes('change') && text.includes('by')) return 'variables';
+        if (text.includes('add to list') || (text.includes('delete') && text.includes('list')) || text.includes('item of')) return 'variables';
+        
+        // Operators (check for mathematical symbols and logical operators)
+        if (text.match(/[\+\-\*\/]/) && !text.includes('change') && !text.includes('turn')) return 'operators';
+        if ((text.includes('=') || text.includes('<') || text.includes('>')) && !text.includes('repeat until') && !text.includes('if ')) return 'operators';
+        if (text.includes(' and ') || text.includes(' or ') || text.includes('not ')) return 'operators';
+        if (text.includes('join') || text.includes('letter') || text.includes('length') || text.includes('contains')) return 'operators';
+        if (text.includes('random') || text.includes('round') || text.includes('mod')) return 'operators';
+        
+        return null;
+      };
+
+      // Block color mapping
+      interface BlockColors {
+        bg: string;
+        border: string;
+        text: string;
+      }
+
+      interface BlockTypeColors {
+        motion: BlockColors;
+        looks: BlockColors;
+        sound: BlockColors;
+        events: BlockColors;
+        control: BlockColors;
+        sensing: BlockColors;
+        operators: BlockColors;
+        variables: BlockColors;
+        default: BlockColors;
+        [key: string]: BlockColors;
+      }
+
+      const getBlockColor = (blockType: string | null): BlockColors => {
+        const colors: BlockTypeColors = {
+          motion: { bg: '#4C97FF', border: '#3373CC', text: 'white' },
+          looks: { bg: '#9966FF', border: '#774DCB', text: 'white' },
+          sound: { bg: '#CF63CF', border: '#BD42BD', text: 'white' },
+          events: { bg: '#FFD500', border: '#E6BF00', text: '#5A5A5A' },
+          control: { bg: '#FFAB19', border: '#E6941A', text: 'white' },
+          sensing: { bg: '#5CB1D6', border: '#4A90A4', text: 'white' },
+          operators: { bg: '#59C059', border: '#389438', text: 'white' },
+          variables: { bg: '#FF8C1A', border: '#E6771A', text: 'white' },
+          default: { bg: '#E5E5E5', border: '#CCC', text: '#333' }
+        };
+        return colors[blockType || 'default'];
+      };
+
+      const blockType = detectBlockType(codeText);
+      const colors = getBlockColor(blockType);
+      
+      // For inline code, create individual blocks
+      if (inline) {
+        return (
+          <code 
+            className="scratch-block"
+            data-type={blockType}
+            title={blockType ? `${blockType.charAt(0).toUpperCase() + blockType.slice(1)} Block` : 'Scratch Block'}
+            style={{ 
+              backgroundColor: colors.bg,
+              borderColor: colors.border,
+              color: colors.text,
+              fontFamily: 'Courier New, monospace',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              fontSize: '0.85em',
+              fontWeight: '600',
+              display: 'block',
+              margin: '4px 0',
+              maxWidth: 'fit-content',
+              border: '2px solid',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.2s ease',
+              clear: 'both'
+            }}
+            {...props}
+          >
+            {children}
+          </code>
+        );
+      }
+      
+      // For code blocks, treat each line as a separate block
+      return (
+        <div className="script-container" style={{ 
+          backgroundColor: '#f8f9fa',
+          border: '2px dashed #dee2e6',
+          borderRadius: '12px',
+          padding: '16px',
+          margin: '20px 0',
+          position: 'relative'
+        }}>
+          {String(children).split('\n').filter(line => line.trim()).map((line, index) => {
+            // Clean the line and detect its individual block type
+            const cleanLine = line.trim();
+            const lineBlockType = detectBlockType(cleanLine.toLowerCase());
+            const lineColors = getBlockColor(lineBlockType);
             
-            return isBlock ? (
-              <div className={`scratch-block ${blockType}-block p-2 rounded my-2`}>
-                <span className="block-emoji">
-                  {blockType === 'motion' && '🔵'}
-                  {blockType === 'looks' && '🟣'}
-                  {blockType === 'sound' && '💖'}
-                  {blockType === 'events' && '💛'}
-                  {blockType === 'control' && '🟧'}
-                  {blockType === 'sensing' && '🔍'}
-                  {blockType === 'operators' && '💚'}
-                  {blockType === 'variables' && '📦'}
-                </span>
-                <code {...props} className={className}>
-                  {children}
-                </code>
-              </div>
-            ) : (
-              <code className={className} {...props}>
-                {children}
+            // Add indentation for nested blocks
+            const indentLevel = (line.match(/^\s*/)?.[0]?.length || 0) / 2;
+            const marginLeft = indentLevel * 20;
+            
+            return (
+              <code
+                key={index}
+                className="scratch-block"
+                data-type={lineBlockType}
+                title={lineBlockType ? `${lineBlockType.charAt(0).toUpperCase() + lineBlockType.slice(1)} Block` : 'Scratch Block'}
+                style={{ 
+                  backgroundColor: lineColors.bg,
+                  borderColor: lineColors.border,
+                  color: lineColors.text,
+                  fontFamily: 'Courier New, monospace',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  fontSize: '0.85em',
+                  fontWeight: '600',
+                  display: 'block',
+                  margin: '4px 0',
+                  marginLeft: `${marginLeft}px`,
+                  maxWidth: 'fit-content',
+                  border: '2px solid',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s ease',
+                  clear: 'both'
+                }}
+              >
+                {cleanLine}
               </code>
             );
-          }
-        }}
-      >
-        {message.text}
-      </ReactMarkdown>
+          })}
+        </div>
+      );
+    },
+    p({ children }) {
+      return <p className="mb-3 text-sm leading-relaxed">{children}</p>;
+    },
+    li({ children }) {
+      return <li className="mb-2 text-sm">{children}</li>;
+    },
+    h3({ children }) {
+      return <h3 className="text-lg font-semibold mb-2 mt-4">{children}</h3>;
+    },
+    // Add a wrapper for script sections
+    blockquote({ children }) {
+      return (
+        <div className="script-container bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 my-4 relative">
+          {children}
+        </div>
+      );
+    }
+  }}
+>
+  {message.text}
+</ReactMarkdown>
     ) : (
       message.text
     )}
