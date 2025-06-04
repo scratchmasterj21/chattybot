@@ -30,7 +30,7 @@ const ScratchChatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hi! I'm your Scratch programming assistant powered by Google Gemini. I can help you with Scratch programming. What would you like to learn about?",
+      text: "Hi! 🐱 I'm your Scratch helper! Ask me anything about Scratch programming!",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -240,12 +240,13 @@ const ScratchChatbot: React.FC = () => {
             )}
             
 
-<div
-  className={`px-4 py-3 rounded-xl leading-relaxed text-sm ${
+            <div
+  className={`px-3 py-2 rounded-xl leading-relaxed text-xs ${
     message.sender === 'user'
       ? 'bg-blue-500 text-white max-w-lg'
-      : 'bg-white text-gray-800 shadow-md border flex-1 max-w-4xl'
+      : 'bg-white text-gray-800 shadow-md border flex-1 max-w-3xl'
   }`}
+
 >
   <div className={message.sender === 'bot' ? 'markdown-body' : ''}>
     {message.sender === 'bot' ? (
@@ -287,11 +288,11 @@ const ScratchChatbot: React.FC = () => {
       message.text
     )}
   </div>
-  <p className={`text-xs mt-3 ${
-    message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
-  }`}>
-    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-  </p>
+  <p className={`message-timestamp ${
+  message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+}`}>
+  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+</p>
 </div>
 
             {message.sender === 'user' && (
