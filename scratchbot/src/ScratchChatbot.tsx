@@ -214,20 +214,7 @@ const ScratchChatbot: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-orange-100 to-blue-100">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b-2 border-orange-200 p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-            <Bot className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-800">Scratch Programming Helper</h1>
-            <p className="text-sm text-gray-600">
-              {apiKey ? 'Powered by Google Gemini AI' : 'Configuration needed - contact instructor'}
-            </p>
-          </div>
-        </div>
-      </div>
+
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
