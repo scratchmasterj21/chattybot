@@ -12,11 +12,6 @@ interface Message {
   timestamp: Date;
 }
 
-interface StoredMessages {
-  messages: Message[];
-  lastUpdated: string;
-}
-
 // Add these new interfaces
 interface ChatSession {
   id: string;
