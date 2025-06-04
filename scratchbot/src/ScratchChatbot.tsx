@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, AlertCircle } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
   id: number;
@@ -63,16 +65,16 @@ const ScratchChatbot: React.FC = () => {
       throw new Error('API key not configured. Please contact your instructor.');
     }
 
-    const systemPrompt = `Hi! I'm your friendly Scratch helper! 🐱 
+    const systemPrompt = `Hi! I'm your friendly Scratch helper! 🐱
 
-    I'm a specialized Scratch programming assistant, which means I can only help with:
+    I'm a specialized assistant focused exclusively on Scratch programming. I can help you with:
     - Scratch blocks and scripts
     - Sprite actions and costumes
     - Stage and backdrop features
     - Scratch game development
     - Basic programming concepts in Scratch
     
-    When I explain Scratch blocks, I'll show them like this:
+    When I show Scratch blocks, I’ll format them like this:
     
     🔵 Motion Blocks:
     [when green flag clicked ▶️]
@@ -103,18 +105,26 @@ const ScratchChatbot: React.FC = () => {
     (my variable)
     [set [my variable] to (0)]
     
-    Important: I can only answer questions about Scratch programming. If you ask about other topics, I'll kindly remind you to focus on Scratch-related questions! 🎮
+    Important:
+    - I only answer questions about Scratch programming.
+    - If you ask about other topics, I’ll kindly remind you to keep questions Scratch-related.
+    
+    Please ask your Scratch question clearly and simply.
     
     Your Scratch question: ${userMessage}
     
     Instructions for AI:
-    1. Only respond to questions about Scratch programming
-    2. For non-Scratch questions, reply: "I'm your Scratch helper! I can only answer questions about Scratch programming. Would you like to learn about making games, animations, or other fun projects in Scratch?"
-    3. Always use block formatting when showing Scratch code
-    4. Keep explanations simple and beginner-friendly
-    5. Include emojis matching block colors when showing code examples`;
+    1. Only respond to Scratch programming questions.
+    2. For non-Scratch questions, reply:
+       "I'm your Scratch helper! I can only answer questions about Scratch programming. Would you like to learn about making games, animations, or other fun projects in Scratch?"
+    3. Always use block formatting when showing Scratch code examples.
+    4. Keep explanations simple, clear, and beginner-friendly.
+    5. Use emojis matching block colors for code examples.
+    6. Encourage and motivate users to have fun with Scratch! 🎉
+    `;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -230,21 +240,58 @@ const ScratchChatbot: React.FC = () => {
             )}
             
             <div
-              className={`px-6 py-4 rounded-xl leading-relaxed text-base ${
-                message.sender === 'user'
-                  ? 'bg-blue-500 text-white max-w-lg'
-                  : 'bg-white text-gray-800 shadow-md border flex-1 max-w-4xl'
-              }`}
-            >
-              <div className={`whitespace-pre-line ${message.sender === 'bot' ? 'space-y-3' : ''}`}>
-                {message.text}
+  className={`px-6 py-4 rounded-xl leading-relaxed text-base ${
+    message.sender === 'user'
+      ? 'bg-blue-500 text-white max-w-lg'
+      : 'bg-white text-gray-800 shadow-md border flex-1 max-w-4xl'
+  }`}
+>
+  <div className={message.sender === 'bot' ? 'markdown-body' : ''}>
+    {message.sender === 'bot' ? (
+      <ReactMarkdown 
+        remarkPlugins={[remarkGfm]}
+        components={{
+          code({ node, className, children, ...props }: React.HTMLAttributes<HTMLElement> & { node?: any; inline?: boolean }) {
+            const match = /language-(\w+)/.exec(className || '');
+            const blockType = match ? match[1] : '';
+            const isBlock = blockType !== '';
+            
+            return isBlock ? (
+              <div className={`scratch-block ${blockType}-block p-2 rounded my-2`}>
+                <span className="block-emoji">
+                  {blockType === 'motion' && '🔵'}
+                  {blockType === 'looks' && '🟣'}
+                  {blockType === 'sound' && '💖'}
+                  {blockType === 'events' && '💛'}
+                  {blockType === 'control' && '🟧'}
+                  {blockType === 'sensing' && '🔍'}
+                  {blockType === 'operators' && '💚'}
+                  {blockType === 'variables' && '📦'}
+                </span>
+                <code {...props} className={className}>
+                  {children}
+                </code>
               </div>
-              <p className={`text-xs mt-3 ${
-                message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
-              }`}>
-                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
-            </div>
+            ) : (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            );
+          }
+        }}
+      >
+        {message.text}
+      </ReactMarkdown>
+    ) : (
+      message.text
+    )}
+  </div>
+  <p className={`text-xs mt-3 ${
+    message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+  }`}>
+    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+  </p>
+</div>
 
             {message.sender === 'user' && (
               <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
