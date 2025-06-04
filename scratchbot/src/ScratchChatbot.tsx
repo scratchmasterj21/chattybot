@@ -41,8 +41,7 @@ const ScratchChatbot: React.FC = () => {
   // Get API key from environment variable
   // In a real deployment, this would be injected during build time
   // For now, you'll need to replace this with your actual API key
-  const apiKey: string = (window as any).REACT_APP_GEMINI_API_KEY || 'AIzaSyC49pY5wL98WiWP4aRs9KOXOe_4rUPWIsw';
-
+  const apiKey: string = import.meta.env.VITE_GEMINI_API_KEY || '';  
   const scrollToBottom = (): void => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
