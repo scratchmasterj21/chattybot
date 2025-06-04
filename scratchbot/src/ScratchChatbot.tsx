@@ -42,6 +42,7 @@ const ScratchChatbot: React.FC = () => {
   // In a real deployment, this would be injected during build time
   // For now, you'll need to replace this with your actual API key
   const apiKey: string = import.meta.env.VITE_GEMINI_API_KEY || '';  
+  
   const scrollToBottom = (): void => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -62,29 +63,59 @@ const ScratchChatbot: React.FC = () => {
       throw new Error('API key not configured. Please contact your instructor.');
     }
 
-    const systemPrompt = `You are a helpful Scratch programming assistant for students. You specialize in:
+    const systemPrompt = `Hi! I'm your friendly Scratch helper! 🐱 
 
-1. Scratch programming concepts (sprites, blocks, scripts, stage)
-2. Block categories: Motion, Looks, Sound, Events, Control, Sensing, Operators, Variables
-3. Common Scratch projects: animations, games, interactive stories
-4. Debugging help and troubleshooting
-5. Programming concepts explained simply for beginners
+    I'm a specialized Scratch programming assistant, which means I can only help with:
+    - Scratch blocks and scripts
+    - Sprite actions and costumes
+    - Stage and backdrop features
+    - Scratch game development
+    - Basic programming concepts in Scratch
+    
+    When I explain Scratch blocks, I'll show them like this:
+    
+    🔵 Motion Blocks:
+    [when green flag clicked ▶️]
+    [move (10) steps]
+    
+    🟣 Looks Blocks:
+    [say [Hello!] for (2) seconds]
+    [switch costume to (costume1)]
+    
+    💖 Sound Blocks:
+    [play sound (Meow) until done]
+    
+    💛 Events Blocks:
+    [when (space) key pressed]
+    
+    🟧 Control Blocks:
+    [forever]
+    [if <touching (mouse-pointer)?> then]
+    
+    🔍 Sensing Blocks:
+    <touching color [#FF0000]?>
+    
+    💚 Operators Blocks:
+    ((2) + (2))
+    <(my variable) > (50)>
+    
+    📦 Variables:
+    (my variable)
+    [set [my variable] to (0)]
+    
+    Important: I can only answer questions about Scratch programming. If you ask about other topics, I'll kindly remind you to focus on Scratch-related questions! 🎮
+    
+    Your Scratch question: ${userMessage}
+    
+    Instructions for AI:
+    1. Only respond to questions about Scratch programming
+    2. For non-Scratch questions, reply: "I'm your Scratch helper! I can only answer questions about Scratch programming. Would you like to learn about making games, animations, or other fun projects in Scratch?"
+    3. Always use block formatting when showing Scratch code
+    4. Keep explanations simple and beginner-friendly
+    5. Include emojis matching block colors when showing code examples`;
 
-Guidelines:
-- Keep responses clear and beginner-friendly
-- Use specific Scratch block names when relevant (use quotes like "move 10 steps")
-- Provide step-by-step instructions when possible
-- Encourage experimentation and creativity
-- Be patient and supportive
-- Include practical examples when explaining concepts
-- If asked about non-Scratch topics, gently redirect to Scratch programming
-- Break down complex concepts into simple parts
-- Use encouraging language suitable for students
-
-User question: ${userMessage}`;
-
-const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-  method: 'POST',
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -166,6 +197,10 @@ const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/m
     }
   };
 
+  const handleSuggestionClick = (suggestion: string): void => {
+    setInputText(suggestion);
+  };
+
   const suggestionQuestions: string[] = [
     'How do I make a sprite move with arrow keys?',
     'What is a forever loop and how do I use it?',
@@ -199,23 +234,25 @@ const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/m
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex gap-3 ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex gap-4 ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             {message.sender === 'bot' && (
-              <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                <Bot className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <Bot className="w-6 h-6 text-white" />
               </div>
             )}
             
             <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+              className={`px-6 py-4 rounded-xl leading-relaxed text-base ${
                 message.sender === 'user'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-gray-800 shadow-sm border'
+                  ? 'bg-blue-500 text-white max-w-lg'
+                  : 'bg-white text-gray-800 shadow-md border flex-1 max-w-4xl'
               }`}
             >
-              <p className="whitespace-pre-line">{message.text}</p>
-              <p className={`text-xs mt-1 ${
+              <div className={`whitespace-pre-line ${message.sender === 'bot' ? 'space-y-3' : ''}`}>
+                {message.text}
+              </div>
+              <p className={`text-xs mt-3 ${
                 message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
               }`}>
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -223,23 +260,23 @@ const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/m
             </div>
 
             {message.sender === 'user' && (
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                <User className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <User className="w-6 h-6 text-white" />
               </div>
             )}
           </div>
         ))}
 
         {isTyping && (
-          <div className="flex gap-3 justify-start">
-            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-              <Bot className="w-5 h-5 text-white" />
+          <div className="flex gap-4 justify-start">
+            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+              <Bot className="w-6 h-6 text-white" />
             </div>
-            <div className="bg-white text-gray-800 shadow-sm border px-4 py-2 rounded-lg">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+            <div className="bg-white text-gray-800 shadow-md border px-6 py-4 rounded-xl">
+              <div className="flex space-x-2">
+                <div className="w-3 h-3 bg-gray-400 rounded-full animate-bounce"></div>
+                <div className="w-3 h-3 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <div className="w-3 h-3 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
               </div>
             </div>
           </div>
@@ -258,15 +295,15 @@ const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/m
       {/* Input */}
       <div className="bg-white border-t p-4">
         <div className="flex gap-2">
-          <input
-            type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={apiKey ? "Ask me anything about Scratch programming..." : "API key not configured - contact instructor"}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            disabled={isTyping || !apiKey}
-          />
+        <input
+  type="text"
+  value={inputText}
+  onChange={(e) => setInputText(e.target.value)}
+  onKeyPress={handleKeyPress}
+  placeholder={apiKey ? "Ask me anything about Scratch programming..." : "API key not configured - contact instructor"}
+  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-black placeholder-gray-500"
+  disabled={isTyping || !apiKey}
+/>
           <button
             onClick={handleSend}
             disabled={!inputText.trim() || isTyping || !apiKey}
@@ -276,18 +313,21 @@ const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/m
           </button>
         </div>
         
-        {apiKey && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {suggestionQuestions.map((suggestion) => (
-              <button
-                key={suggestion}
-                onClick={() => setInputText(suggestion)}
-                disabled={isTyping}
-                className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50"
-              >
-                {suggestion}
-              </button>
-            ))}
+        {apiKey && messages.length <= 2 && (
+          <div className="mt-3">
+            <p className="text-xs text-gray-600 mb-2">Quick questions to get started:</p>
+            <div className="flex flex-wrap gap-2 max-h-20 overflow-y-auto">
+              {suggestionQuestions.slice(0, 4).map((suggestion) => (
+                <button
+                  key={suggestion}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  disabled={isTyping}
+                  className="px-3 py-1.5 text-sm bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-lg transition-colors disabled:opacity-50 border border-orange-200"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
           </div>
         )}
         
