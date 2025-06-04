@@ -1,4 +1,3 @@
-import React from 'react'
 import ScratchChatbot from './ScratchChatbot' // Adjust path if needed
 import './App.css'
 
