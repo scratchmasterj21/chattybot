@@ -2,12 +2,33 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, AlertCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+// Add these imports at the top
+import { Trash2, RotateCcw } from 'lucide-react';
 
 interface Message {
   id: number;
   text: string;
   sender: 'bot' | 'user';
   timestamp: Date;
+}
+
+interface StoredMessages {
+  messages: Message[];
+  lastUpdated: string;
+}
+
+// Add these new interfaces
+interface ChatSession {
+  id: string;
+  title: string;
+  lastMessage: string;
+  timestamp: Date;
+  messages: Message[];
+}
+
+interface StoredSessions {
+  sessions: ChatSession[];
+  lastUpdated: string;
 }
 
 interface GeminiResponse {
@@ -27,14 +48,135 @@ interface GeminiErrorResponse {
 }
 
 const ScratchChatbot: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
+    const [messages, setMessages] = useState<Message[]>(() => {
+      const stored = localStorage.getItem('scratchbot_sessions');
+      if (stored) {
+        const { sessions } = JSON.parse(stored) as StoredSessions;
+        const currentSession = sessions[sessions.length - 1];
+        if (currentSession) {
+          return currentSession.messages.map(msg => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }));
+        }
+      }
+      // Initial message for new chat
+      return [{
+        id: 1,
+        text: "Hi! 🐱 I'm your Scratch helper! Ask me anything about Scratch programming!",
+        sender: 'bot',
+        timestamp: new Date()
+      }];
+    });
+    
+    // Update the sessions state initialization
+    const [sessions, setSessions] = useState<ChatSession[]>(() => {
+      const stored = localStorage.getItem('scratchbot_sessions');
+      if (stored) {
+        const { sessions } = JSON.parse(stored) as StoredSessions;
+        // Convert string timestamps back to Date objects
+        return sessions.map(session => ({
+          ...session,
+          timestamp: new Date(session.timestamp),
+          messages: session.messages.map(msg => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }))
+        }));
+      }
+      return [];
+    });
+  const [currentSessionId, setCurrentSessionId] = useState<string>(() => {
+    return Date.now().toString();
+  });
+
+  useEffect(() => {
+    const storedData: StoredSessions = {
+      sessions,
+      lastUpdated: new Date().toISOString()
+    };
+    localStorage.setItem('scratchbot_sessions', JSON.stringify(storedData));
+  }, [sessions]);
+
+  // Add this effect to save messages to localStorage
+  // Remove this effect:
+  // useEffect(() => {
+  //   const storedData: StoredMessages = {
+  //     messages,
+  //     lastUpdated: new Date().toISOString()
+  //   };
+  //   localStorage.setItem('scratchbot_messages', JSON.stringify(storedData));
+  // }, [messages]);
+
+  // Add these new functions
+  const handleNewChat = () => {
+    const newSessionId = Date.now().toString();
+    const initialMessage: Message = {
+      id: Date.now(),
       text: "Hi! 🐱 I'm your Scratch helper! Ask me anything about Scratch programming!",
       sender: 'bot',
       timestamp: new Date()
+    };
+    
+    const newSession: ChatSession = {
+      id: newSessionId,
+      title: 'New Chat',
+      lastMessage: initialMessage.text,
+      timestamp: new Date(),
+      messages: [{ ...initialMessage, sender: 'bot' }]
+    };
+    
+    setSessions(prev => [...prev, newSession]);
+    setCurrentSessionId(newSessionId);
+    setMessages([initialMessage]);
+    setInputText('');
+    setError('');
+  };
+
+  // Add session drawer component
+  const SessionDrawer: React.FC = () => (
+    <div className="w-64 bg-white border-r overflow-y-auto p-2 space-y-2">
+      <button
+        onClick={handleNewChat}
+        className="w-full px-3 py-2 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition-colors text-sm font-medium"
+      >
+        New Chat
+      </button>
+      <div className="space-y-1">
+        {sessions.map(session => (
+          <button
+            key={session.id}
+            onClick={() => {
+              setCurrentSessionId(session.id);
+              setMessages(session.messages);
+            }}
+            className={`w-full px-3 py-2 rounded-lg text-left text-sm transition-colors ${
+              currentSessionId === session.id
+                ? 'bg-orange-100 text-orange-700'
+                : 'hover:bg-gray-100 text-gray-700'
+            }`}
+          >
+            <div className="font-medium truncate">{session.title}</div>
+            <div className="text-xs text-gray-500 truncate">{session.lastMessage}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const handleClearMessages = () => {
+    if (window.confirm('Are you sure you want to delete all messages?')) {
+      localStorage.removeItem('scratchbot_sessions');
+      handleNewChat();
     }
-  ]);
+  };
+
+  useEffect(() => {
+    if (sessions.length === 0) {
+      handleNewChat();
+    }
+  }, []);
+
   const [inputText, setInputText] = useState<string>('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -64,68 +206,81 @@ const ScratchChatbot: React.FC = () => {
     if (!apiKey) {
       throw new Error('API key not configured. Please contact your instructor.');
     }
+  
+    // Get recent conversation history (last 5 messages)
+    const recentMessages = messages.slice(-5).map(msg => ({
+      role: msg.sender,
+      text: msg.text
+    }));
+  
+    const conversationHistory = recentMessages
+      .map(msg => `${msg.role === 'user' ? 'Student' : 'Assistant'}: ${msg.text}`)
+      .join('\n\n');
+  
+    
+      const systemPrompt = `Hi! I'm your friendly Scratch helper! 🐱
 
-    const systemPrompt = `Hi! I'm your friendly Scratch helper! 🐱
+      I'm a specialized assistant focused exclusively on Scratch programming. I can help you with:
+      - Scratch blocks and scripts
+      - Sprite actions and costumes
+      - Stage and backdrop features
+      - Scratch game development
+      - Basic programming concepts in Scratch
+      
+      When I show Scratch blocks, I’ll format them like this:
+      
+      🔵 Motion Blocks:
+      [when green flag clicked ▶️]
+      [move (10) steps]
+      
+      🟣 Looks Blocks:
+      [say [Hello!] for (2) seconds]
+      [switch costume to (costume1)]
+      
+      💖 Sound Blocks:
+      [play sound (Meow) until done]
+      
+      💛 Events Blocks:
+      [when (space) key pressed]
+      
+      🟧 Control Blocks:
+      [forever]
+      [if <touching (mouse-pointer)?> then]
+      
+      🔍 Sensing Blocks:
+      <touching color [#FF0000]?>
+      
+      💚 Operators Blocks:
+      ((2) + (2))
+      <(my variable) > (50)>
+      
+      📦 Variables:
+      (my variable)
+      [set [my variable] to (0)]
+      
+      Important:
+      - I only answer questions about Scratch programming.
+      - If you ask about other topics, I’ll kindly remind you to keep questions Scratch-related.
+      
+      Please ask your Scratch question clearly and simply.
 
-    I'm a specialized assistant focused exclusively on Scratch programming. I can help you with:
-    - Scratch blocks and scripts
-    - Sprite actions and costumes
-    - Stage and backdrop features
-    - Scratch game development
-    - Basic programming concepts in Scratch
-    
-    When I show Scratch blocks, I’ll format them like this:
-    
-    🔵 Motion Blocks:
-    [when green flag clicked ▶️]
-    [move (10) steps]
-    
-    🟣 Looks Blocks:
-    [say [Hello!] for (2) seconds]
-    [switch costume to (costume1)]
-    
-    💖 Sound Blocks:
-    [play sound (Meow) until done]
-    
-    💛 Events Blocks:
-    [when (space) key pressed]
-    
-    🟧 Control Blocks:
-    [forever]
-    [if <touching (mouse-pointer)?> then]
-    
-    🔍 Sensing Blocks:
-    <touching color [#FF0000]?>
-    
-    💚 Operators Blocks:
-    ((2) + (2))
-    <(my variable) > (50)>
-    
-    📦 Variables:
-    (my variable)
-    [set [my variable] to (0)]
-    
-    Important:
-    - I only answer questions about Scratch programming.
-    - If you ask about other topics, I’ll kindly remind you to keep questions Scratch-related.
-    
-    Please ask your Scratch question clearly and simply.
-    
-    Your Scratch question: ${userMessage}
-    
-    Instructions for AI:
-    1. Only respond to Scratch programming questions.
-    2. For non-Scratch questions, reply:
-       "I'm your Scratch helper! I can only answer questions about Scratch programming. Would you like to learn about making games, animations, or other fun projects in Scratch?"
-    3. Always use block formatting when showing Scratch code examples.
-    4. Keep explanations simple, clear, and beginner-friendly.
-    5. Use emojis matching block colors for code examples.
-    6. Encourage and motivate users to have fun with Scratch! 🎉
-    `;
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-
-      method: 'POST',
+      Previous conversation:
+${conversationHistory}
+      
+      Your Scratch question: ${userMessage}
+      
+      Instructions for AI:
+      1. Only respond to Scratch programming questions.
+      2. For non-Scratch questions, reply:
+         "I'm your Scratch helper! I can only answer questions about Scratch programming. Would you like to learn about making games, animations, or other fun projects in Scratch?"
+      3. Always use block formatting when showing Scratch code examples.
+      4. Keep explanations simple, clear, and beginner-friendly.
+      5. Use emojis matching block colors for code examples.
+      6. Encourage and motivate users to have fun with Scratch! 🎉
+      `;
+  
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -143,12 +298,12 @@ const ScratchChatbot: React.FC = () => {
         }
       })
     });
-
+  
     if (!response.ok) {
       const errorData: GeminiErrorResponse = await response.json();
       throw new Error(errorData.error?.message || 'Failed to get response from Gemini API');
     }
-
+  
     const data: GeminiResponse = await response.json();
     return data.candidates[0]?.content?.parts[0]?.text || 'Sorry, I couldn\'t generate a response. Please try asking your question differently.';
   };
@@ -167,7 +322,21 @@ const ScratchChatbot: React.FC = () => {
       timestamp: new Date()
     };
 
+    // Update messages and sessions
     setMessages(prev => [...prev, userMessage]);
+    setSessions(prevSessions => 
+      prevSessions.map(session => 
+        session.id === currentSessionId
+          ? {
+              ...session,
+              messages: [...session.messages, userMessage],
+              lastMessage: userMessage.text,
+              timestamp: new Date()
+            }
+          : session
+      )
+    );
+
     const currentInput = inputText;
     setInputText('');
     setIsTyping(true);
@@ -175,15 +344,27 @@ const ScratchChatbot: React.FC = () => {
 
     try {
       const response = await callGeminiAPI(currentInput);
-      
       const botResponse: Message = {
         id: Date.now() + 1,
         text: response,
         sender: 'bot',
         timestamp: new Date()
       };
-      
+
+      // Update both messages and session with bot response
       setMessages(prev => [...prev, botResponse]);
+      setSessions(prevSessions =>
+        prevSessions.map(session =>
+          session.id === currentSessionId
+            ? {
+                ...session,
+                messages: [...session.messages, botResponse],
+                lastMessage: botResponse.text.slice(0, 100) + '...',
+                timestamp: new Date()
+              }
+            : session
+        )
+      );
     } catch (err) {
       console.error('Gemini API Error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -223,8 +404,28 @@ const ScratchChatbot: React.FC = () => {
   ];
 
   return (
+    <div className="flex h-screen">
+      <SessionDrawer />
     <div className="flex flex-col h-screen bg-gradient-to-br from-orange-100 to-blue-100">
-
+      <div className="bg-white border-b p-2 flex justify-between items-center">
+        <h2 className="text-sm font-medium text-gray-700">Scratch Helper</h2>
+        <div className="flex gap-2">
+          <button
+            onClick={handleNewChat}
+            className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Start New Chat"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleClearMessages}
+            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            title="Clear Message History"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -373,6 +574,7 @@ const ScratchChatbot: React.FC = () => {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };
