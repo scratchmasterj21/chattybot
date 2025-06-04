@@ -28,7 +28,7 @@ const ScratchChatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hi! I'm your Scratch programming assistant powered by Google Gemini. I can help you with Scratch blocks, sprites, sounds, animations, games, and any programming concepts. What would you like to learn about?",
+      text: "Hi! I'm your Scratch programming assistant powered by Google Gemini. I can help you with Scratch programming. What would you like to learn about?",
       sender: 'bot',
       timestamp: new Date()
     }
