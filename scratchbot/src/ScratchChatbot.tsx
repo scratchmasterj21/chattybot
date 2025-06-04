@@ -159,10 +159,22 @@ const ScratchChatbot: React.FC = () => {
     </div>
   );
 
+  // Update the handleClearMessages function to delete only the current session
   const handleClearMessages = () => {
-    if (window.confirm('Are you sure you want to delete all messages?')) {
-      localStorage.removeItem('scratchbot_sessions');
-      handleNewChat();
+    if (window.confirm('Are you sure you want to delete this conversation?')) {
+      // Remove current session from sessions array
+      setSessions(prevSessions => prevSessions.filter(session => session.id !== currentSessionId));
+      
+      // If there are other sessions, switch to the most recent one
+      // If no sessions left, create a new chat
+      const remainingSessions = sessions.filter(session => session.id !== currentSessionId);
+      if (remainingSessions.length > 0) {
+        const lastSession = remainingSessions[remainingSessions.length - 1];
+        setCurrentSessionId(lastSession.id);
+        setMessages(lastSession.messages);
+      } else {
+        handleNewChat();
+      }
     }
   };
 
@@ -415,7 +427,7 @@ ${conversationHistory}
           <button
             onClick={handleClearMessages}
             className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-            title="Clear Message History"
+            title="Delete Current Chat"
           >
             <Trash2 className="w-4 h-4" />
           </button>
