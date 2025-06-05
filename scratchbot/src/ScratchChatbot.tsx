@@ -621,6 +621,7 @@ Instructions for AI:
         if (cleanText.includes('if ') && !text.includes('bounce')) return 'control';
         if (text.includes('else') || text.includes('wait')) return 'control';
         if (text.includes('stop') && (text.includes('all') || text.includes('script'))) return 'control';
+        if (text.includes('create clone') || text.includes('delete clone') || text.includes('when i start as a clone')) return 'control';
         if (text.includes('end')) return 'control';
         
         // Looks blocks
@@ -645,11 +646,12 @@ Instructions for AI:
         if (text.includes('add to list') || (text.includes('delete') && text.includes('list')) || text.includes('item of')) return 'variables';
         
         // Operators (check for mathematical symbols and logical operators)
+        if (text.includes('pick random') || text.includes('random')) return 'operators';
         if (text.match(/[\+\-\*\/]/) && !text.includes('change') && !text.includes('turn')) return 'operators';
         if ((text.includes('=') || text.includes('<') || text.includes('>')) && !text.includes('repeat until') && !text.includes('if ')) return 'operators';
         if (text.includes(' and ') || text.includes(' or ') || text.includes('not ')) return 'operators';
         if (text.includes('join') || text.includes('letter') || text.includes('length') || text.includes('contains')) return 'operators';
-        if (text.includes('random') || text.includes('round') || text.includes('mod')) return 'operators';
+        if (text.includes('round') || text.includes('mod')) return 'operators';
         
         return null;
       };
@@ -658,25 +660,59 @@ Instructions for AI:
       const isVariableReference = (content: string): boolean => {
         const lowerContent = content.toLowerCase().trim();
         
-        // Variable patterns: just variable names, simple comparisons, or variable operations
-        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*v?$/)) return true; // variable name with optional 'v'
-        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*=\s*-?\d+$/)) return true; // variable = number (including negative)
-        if (lowerContent.match(/^-?\d+$/)) return true; // just numbers (including negative)
-        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*[+\-*/]\s*-?\d+$/)) return true; // variable + number (including negative)
-        
-        // Specific patterns for common variable expressions
-        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*[<>=!]+\s*-?\d+$/)) return true; // variable comparison operators
-        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*[<>=!]+\s*[a-zA-Z_][a-zA-Z0-9_\s]*$/)) return true; // variable comparison to variable
-        
-        // Don't treat actual sensing blocks as variables
+        // Don't treat actual sensing/control/other blocks as variables
         if (lowerContent.includes('touching') || lowerContent.includes('key') || lowerContent.includes('pressed') || 
-            lowerContent.includes('edge') || lowerContent.includes('mouse') || lowerContent.includes('distance')) {
+            lowerContent.includes('edge') || lowerContent.includes('mouse') || lowerContent.includes('distance') ||
+            lowerContent.includes('loudness') || lowerContent.includes('timer') || lowerContent.includes('ask') ||
+            lowerContent.includes('answer') || lowerContent.includes('username') || lowerContent.includes('current') ||
+            lowerContent.includes('days since') || lowerContent.includes('backdrop') || lowerContent.includes('costume') ||
+            lowerContent.includes('size') || lowerContent.includes('effect') || lowerContent.includes('volume') ||
+            lowerContent.includes('tempo') || lowerContent.includes('sprite') || lowerContent.includes('stage') ||
+            lowerContent.includes('myself') || lowerContent.includes('clone') || lowerContent.includes('original') ||
+            lowerContent.includes('pick random') || lowerContent.includes('random') || lowerContent.includes('round') ||
+            lowerContent.includes('join') || lowerContent.includes('letter') || lowerContent.includes('length') ||
+            lowerContent.includes('contains') || lowerContent.includes('mod')) {
           return false;
         }
         
-        // Check if it's a sensing/operator block (should be colored)
+        // Variable patterns - be more comprehensive
+        // Simple variable names (with optional dropdown indicator 'v')
+        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*v?$/)) return true;
+        
+        // Numbers (positive, negative, decimals)
+        if (lowerContent.match(/^-?\d+\.?\d*$/)) return true;
+        
+        // Variable with mathematical operators
+        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*[+\-*/]\s*-?\d+\.?\d*$/)) return true;
+        if (lowerContent.match(/^-?\d+\.?\d*\s*[+\-*/]\s*[a-zA-Z_][a-zA-Z0-9_\s]*$/)) return true;
+        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*[+\-*/]\s*[a-zA-Z_][a-zA-Z0-9_\s]*$/)) return true;
+        
+        // Variable with comparison operators
+        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*[<>=!]+\s*-?\d+\.?\d*$/)) return true;
+        if (lowerContent.match(/^-?\d+\.?\d*\s*[<>=!]+\s*[a-zA-Z_][a-zA-Z0-9_\s]*$/)) return true;
+        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*[<>=!]+\s*[a-zA-Z_][a-zA-Z0-9_\s]*$/)) return true;
+        
+        // Text/string values (often used in variables)
+        if (lowerContent.match(/^"[^"]*"$/)) return true; // quoted strings
+        if (lowerContent.match(/^'[^']*'$/)) return true; // single quoted strings
+        
+        // Common Scratch variable/list patterns
+        if (lowerContent.match(/^item\s+\d+\s+of\s+[a-zA-Z_][a-zA-Z0-9_\s]*$/)) return true; // item X of list
+        if (lowerContent.match(/^length\s+of\s+[a-zA-Z_][a-zA-Z0-9_\s]*$/)) return true; // length of list
+        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s+contains\s+[a-zA-Z_][a-zA-Z0-9_\s]*$/)) return true; // list contains item
+        
+        // Coordinate patterns
+        if (lowerContent.match(/^x\s+position$/)) return true;
+        if (lowerContent.match(/^y\s+position$/)) return true;
+        if (lowerContent.match(/^direction$/)) return true;
+        
+        // Check if it's definitely a block type that should be colored
         const blockType = detectBlockType(lowerContent);
-        return blockType === 'variables' || blockType === null;
+        if (blockType && blockType !== 'variables' && blockType !== 'default') {
+          return false; // It's a real block, don't treat as variable
+        }
+        
+        return blockType === 'variables' || blockType === null || blockType === 'default';
       };
 
       // Function to extract and render nested blocks
