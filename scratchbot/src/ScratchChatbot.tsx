@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, type JSX } from 'react';
 import { Send, Bot, User, AlertCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -588,18 +588,14 @@ Instructions for AI:
 >
   <div className={message.sender === 'bot' ? 'markdown-body' : ''}>
     {message.sender === 'bot' ? (
-      // Enhanced ReactMarkdown component with Scratch block detection
 // Comprehensive ReactMarkdown component with complete Scratch block detection
-// Enhanced ReactMarkdown with improved block formatting
-// Enhanced ReactMarkdown with improved block formatting
-// Updated React component with proper block stacking
 <ReactMarkdown
   remarkPlugins={[remarkGfm]}
   components={{
     code({ inline, className, children, ...props }: React.HTMLAttributes<HTMLElement> & { inline?: boolean; className?: string; children?: React.ReactNode }) {
       const codeText = String(children).toLowerCase().trim();
       
-      // Enhanced block detection function - checks specific patterns before general ones
+      // Enhanced block detection function - handles nested blocks
       const detectBlockType = (text: string): string | null => {
         // Remove common punctuation and numbers for better detection
         const cleanText: string = text.replace(/[()[\]<>]/g, ' ').replace(/\d+/g, '').replace(/\s+/g, ' ').trim();
@@ -658,7 +654,119 @@ Instructions for AI:
         return null;
       };
 
-      // Block color mapping
+      // Function to check if content is a variable reference or actual nested block
+      const isVariableReference = (content: string): boolean => {
+        const lowerContent = content.toLowerCase().trim();
+        
+        // Variable patterns: just variable names, simple comparisons, or variable operations
+        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*v?$/)) return true; // variable name with optional 'v'
+        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*=\s*-?\d+$/)) return true; // variable = number (including negative)
+        if (lowerContent.match(/^-?\d+$/)) return true; // just numbers (including negative)
+        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*[+\-*/]\s*-?\d+$/)) return true; // variable + number (including negative)
+        
+        // Specific patterns for common variable expressions
+        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*[<>=!]+\s*-?\d+$/)) return true; // variable comparison operators
+        if (lowerContent.match(/^[a-zA-Z_][a-zA-Z0-9_\s]*\s*[<>=!]+\s*[a-zA-Z_][a-zA-Z0-9_\s]*$/)) return true; // variable comparison to variable
+        
+        // Don't treat actual sensing blocks as variables
+        if (lowerContent.includes('touching') || lowerContent.includes('key') || lowerContent.includes('pressed') || 
+            lowerContent.includes('edge') || lowerContent.includes('mouse') || lowerContent.includes('distance')) {
+          return false;
+        }
+        
+        // Check if it's a sensing/operator block (should be colored)
+        const blockType = detectBlockType(lowerContent);
+        return blockType === 'variables' || blockType === null;
+      };
+
+      // Function to extract and render nested blocks
+      const parseNestedBlocks = (text: string): JSX.Element[] => {
+        const parts: JSX.Element[] = [];
+        let currentIndex = 0;
+        
+        // Regex to find content within angle brackets, parentheses, or square brackets
+        const nestedBlockRegex = /<([^>]+)>|\(([^)]+)\)|\[([^\]]+)\]/g;
+        let match: RegExpExecArray | null;
+        
+        while ((match = nestedBlockRegex.exec(text)) !== null) {
+          // Add text before the match
+          if (match.index > currentIndex) {
+            const beforeText = text.slice(currentIndex, match.index);
+            if (beforeText.trim()) {
+              parts.push(
+                <span key={`text-${currentIndex}`}>{beforeText}</span>
+              );
+            }
+          }
+          
+          // Process the nested block
+          const nestedContent = match[1] || match[2] || match[3]; // Content from <>, (), or []
+          if (nestedContent) {
+            // Check if this is a variable reference or actual nested block
+            if (isVariableReference(nestedContent)) {
+              // Render as a simple variable box with neutral styling
+              parts.push(
+                <span
+                  key={`var-${match.index}`}
+                  style={{
+                    backgroundColor: 'white',
+                    border: '1px solid #ccc',
+                    color: '#333',
+                    padding: '1px 4px',
+                    borderRadius: '3px',
+                    fontSize: '0.9em',
+                    margin: '0 1px',
+                    display: 'inline-block'
+                  }}
+                  title="Variable"
+                >
+                  {nestedContent}
+                </span>
+              );
+            } else {
+              // Render as a colored nested block
+              const nestedBlockType = detectBlockType(nestedContent.toLowerCase());
+              const nestedColors = getBlockColor(nestedBlockType);
+              
+              parts.push(
+                <span
+                  key={`nested-${match.index}`}
+                  style={{
+                    backgroundColor: nestedColors.bg,
+                    borderColor: nestedColors.border,
+                    color: nestedColors.text,
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    border: '1px solid',
+                    fontSize: '0.9em',
+                    margin: '0 2px',
+                    display: 'inline-block'
+                  }}
+                  title={nestedBlockType ? `${nestedBlockType.charAt(0).toUpperCase() + nestedBlockType.slice(1)} Block` : 'Nested Block'}
+                >
+                  {nestedContent}
+                </span>
+              );
+            }
+          }
+          
+          currentIndex = match.index + match[0].length;
+        }
+        
+        // Add remaining text
+        if (currentIndex < text.length) {
+          const remainingText = text.slice(currentIndex);
+          if (remainingText.trim()) {
+            parts.push(
+              <span key={`text-end-${currentIndex}`}>{remainingText}</span>
+            );
+          }
+        }
+        
+        return parts.length > 0 ? parts : [<span key="original">{text}</span>];
+      };
+
+      // Block color mapping with proper TypeScript interfaces
       interface BlockColors {
         bg: string;
         border: string;
@@ -696,8 +804,10 @@ Instructions for AI:
       const blockType = detectBlockType(codeText);
       const colors = getBlockColor(blockType);
       
-      // For inline code, create individual blocks
+      // For inline code, create individual blocks with nested block support
       if (inline) {
+        const blockContent = parseNestedBlocks(String(children));
+        
         return (
           <code 
             className="scratch-block"
@@ -723,12 +833,12 @@ Instructions for AI:
             }}
             {...props}
           >
-            {children}
+            {blockContent}
           </code>
         );
       }
       
-      // For code blocks, treat each line as a separate block
+      // For code blocks, treat each line as a separate block with nested support
       return (
         <div className="script-container" style={{ 
           backgroundColor: '#f8f9fa',
@@ -747,6 +857,9 @@ Instructions for AI:
             // Add indentation for nested blocks
             const indentLevel = (line.match(/^\s*/)?.[0]?.length || 0) / 2;
             const marginLeft = indentLevel * 20;
+            
+            // Parse nested blocks for this line
+            const lineContent = parseNestedBlocks(cleanLine);
             
             return (
               <code
@@ -774,24 +887,24 @@ Instructions for AI:
                   clear: 'both'
                 }}
               >
-                {cleanLine}
+                {lineContent}
               </code>
             );
           })}
         </div>
       );
     },
-    p({ children }) {
+    p({ children }: { children?: React.ReactNode }) {
       return <p className="mb-3 text-sm leading-relaxed">{children}</p>;
     },
-    li({ children }) {
+    li({ children }: { children?: React.ReactNode }) {
       return <li className="mb-2 text-sm">{children}</li>;
     },
-    h3({ children }) {
+    h3({ children }: { children?: React.ReactNode }) {
       return <h3 className="text-lg font-semibold mb-2 mt-4">{children}</h3>;
     },
     // Add a wrapper for script sections
-    blockquote({ children }) {
+    blockquote({ children }: { children?: React.ReactNode }) {
       return (
         <div className="script-container bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 my-4 relative">
           {children}
