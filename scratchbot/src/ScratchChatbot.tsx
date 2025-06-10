@@ -12,6 +12,226 @@ const STORAGE_KEY = 'scratchbot_sessions';
 const MAX_HISTORY_MESSAGES = 10;
 const SESSION_TITLE_MAX_LENGTH = 30;
 
+const SUGGESTION_PROMPTS = [
+  // Basic Scratch Concepts (1-20)
+  "How do I make a sprite move?",
+  "How can I create a simple game?",
+  "What are variables in Scratch?",
+  "How do I add sound effects?",
+  "How do I make my sprite change costumes?",
+  "How can I create a drawing program?",
+  "What are loops and how do I use them?",
+  "How do I detect when sprites touch?",
+  "How can I make a quiz game?",
+  "How do I use the pen blocks?",
+  "How can I make my sprite follow the mouse?",
+  "What are custom blocks and how do I make them?",
+  "How do I make a sprite bounce off walls?",
+  "How do I use the broadcast blocks?",
+  "What are lists in Scratch and how do I use them?",
+  "How do I create animations with my sprite?",
+  "What are clones and how do I use them?",
+  "How do I make sprites talk to each other?",
+  "How can I create different difficulty levels?",
+  "How do I use sensors to control my project?",
+
+  // Game Development (21-60)
+  "How do I make a platformer game?",
+  "How can I create a racing game?",
+  "How can I make a maze game?",
+  "How do I create a jumping character?",
+  "How can I make a catching game?",
+  "How do I add gravity to my game?",
+  "How can I create a point-and-click adventure?",
+  "How can I make a memory matching game?",
+  "How can I make a simple AI opponent?",
+  "How can I create a virtual pet game?",
+  "How can I create a tower defense game?",
+  "How can I create a rhythm game?",
+  "How do I make a health system for my game?",
+  "How can I create a side-scrolling shooter?",
+  "How do I create a Pong game?",
+  "How can I make a Flappy Bird clone?",
+  "How do I create a Snake game?",
+  "How can I make a Pac-Man style game?",
+  "How do I create a Tetris-like puzzle game?",
+  "How can I make a whack-a-mole game?",
+  "How can I make a basketball shooting game?",
+  "How do I create a space invaders game?",
+  "How can I make a fruit ninja style game?",
+  "How do I create a crossy road game?",
+  "How can I make a fighting game?",
+  "How do I create a cooking simulation?",
+  "How can I make an endless runner?",
+  "How do I create a card matching game?",
+  "How can I make a word guessing game?",
+  "How do I create a treasure hunt game?",
+  "How can I make a zombie survival game?",
+  "How do I create a fish tank simulator?",
+  "How can I make a garden growing game?",
+  "How do I create a slot machine game?",
+  "How can I make a reaction time tester?",
+  "How do I create a color mixing game?",
+  "How can I make a typing speed test?",
+  "How do I create a breakout/brick breaker game?",
+  "How can I make a pinball game?",
+  "How do I create a mini golf game?",
+
+  // Creative & Interactive Projects (61-100)
+  "How can I create a story with multiple scenes?",
+  "How can I create a music player?",
+  "How do I use the camera and video blocks?",
+  "How can I make an interactive calculator?",
+  "How can I make a digital clock?",
+  "How do I create a paint application?",
+  "How can I make a chatbot in Scratch?",
+  "How do I create a random story generator?",
+  "How can I make a weather app?",
+  "How do I create a piano keyboard?",
+  "How can I make a sprite dance to music?",
+  "How do I create a password generator?",
+  "How can I make a currency converter?",
+  "How do I create a fortune teller?",
+  "How can I make a magic 8-ball?",
+  "How do I create a to-do list app?",
+  "How can I make a drum machine?",
+  "How do I create a voice recorder?",
+  "How can I make a slideshow presentation?",
+  "How do I create an alarm clock?",
+  "How can I make a stopwatch timer?",
+  "How do I create a calendar app?",
+  "How can I make a photo gallery?",
+  "How do I create a music visualizer?",
+  "How can I make a drawing tablet?",
+  "How do I create a whiteboard app?",
+  "How can I make a screensaver?",
+  "How do I create a meditation app?",
+  "How can I make a habit tracker?",
+  "How do I create a mood tracker?",
+  "How can I make a journal app?",
+  "How do I create a recipe book?",
+  "How can I make a workout timer?",
+  "How do I create a language translator?",
+  "How can I make a unit converter?",
+  "How do I create a tip calculator?",
+  "How can I make a grade calculator?",
+  "How do I create a BMI calculator?",
+  "How can I make a loan calculator?",
+  "How do I create a dice roller?",
+
+  // Visual Effects & Animation (101-140)
+  "How do I make a scrolling background?",
+  "How do I create particle effects?",
+  "How do I make realistic physics movements?",
+  "How do I make sprites rotate smoothly?",
+  "How do I make sprites fade in and out?",
+  "How can I make a sprite follow a path?",
+  "How do I create smooth camera movement?",
+  "How can I make sprites cast shadows?",
+  "How do I create day and night cycles?",
+  "How can I make realistic water effects?",
+  "How do I create fire and explosion effects?",
+  "How can I make sprites glow?",
+  "How do I create lightning effects?",
+  "How can I make rain and snow effects?",
+  "How do I create fog or smoke effects?",
+  "How can I make sprites leave trails?",
+  "How do I create screen shake effects?",
+  "How can I make text appear letter by letter?",
+  "How do I create popup notifications?",
+  "How can I make interactive buttons?",
+  "How do I create progress bars?",
+  "How can I make loading screens?",
+  "How do I create game menus?",
+  "How can I make sprites bounce realistically?",
+  "How do I create morphing animations?",
+  "How can I make sprites stretch and squash?",
+  "How do I create wind effects?",
+  "How can I make realistic jumping animations?",
+  "How do I create spinning wheel animations?",
+  "How can I make sprites wobble?",
+  "How do I create floating animations?",
+  "How can I make sprites pulse or breathe?",
+  "How do I create zoom in/out effects?",
+  "How can I make sprites teleport with effects?",
+  "How do I create slide transitions?",
+  "How can I make sprites melt or dissolve?",
+  "How do I create ripple effects?",
+  "How can I make sprites grow and shrink?",
+  "How do I create wave animations?",
+  "How can I make realistic falling leaves?",
+
+  // Game Mechanics & Systems (141-180)
+  "How can I make high score systems?",
+  "How do I save and load game progress?",
+  "How do I create achievements and badges?",
+  "How can I make sprites respawn?",
+  "How do I create checkpoint systems?",
+  "How can I make power-ups in games?",
+  "How do I create boss battles?",
+  "How can I make collectible items?",
+  "How do I create inventory systems?",
+  "How can I make level progression?",
+  "How do I create upgrade systems?",
+  "How can I make combo systems?",
+  "How do I create multiplayer features?",
+  "How can I make turn-based gameplay?",
+  "How do I create random level generation?",
+  "How can I make energy/stamina systems?",
+  "How do I create crafting systems?",
+  "How can I make trading systems?",
+  "How do I create quest systems?",
+  "How can I make dialogue trees?",
+  "How do I create character stats?",
+  "How can I make skill trees?",
+  "How do I create mini-maps?",
+  "How can I make fast travel systems?",
+  "How do I create shop systems?",
+  "How can I make auction systems?",
+  "How do I create betting systems?",
+  "How can I make tournament brackets?",
+  "How do I create leaderboards?",
+  "How can I make time limits in games?",
+  "How do I create pause menus?",
+  "How can I make settings menus?",
+  "How do I create tutorial systems?",
+  "How can I make hint systems?",
+  "How do I create auto-save features?",
+  "How can I make replay systems?",
+  "How do I create spectator modes?",
+  "How can I make practice modes?",
+  "How do I create sandbox modes?",
+  "How can I make custom level editors?",
+
+  // Advanced & Educational (181-200+)
+  "How do I create a science experiment simulator?",
+  "How can I make a math problem generator?",
+  "How do I create a periodic table app?",
+  "How can I make a solar system model?",
+  "How do I create a human body explorer?",
+  "How can I make a geography quiz?",
+  "How do I create a timeline of history?",
+  "How can I make a language learning game?",
+  "How do I create a spelling bee game?",
+  "How can I make a fraction visualizer?",
+  "How do I create a geometry drawing tool?",
+  "How can I make a physics simulation?",
+  "How do I create a chemistry lab simulator?",
+  "How can I make a plant growth simulator?",
+  "How do I create an ecosystem simulation?",
+  "How can I make a city building game?",
+  "How do I create a stock market simulator?",
+  "How can I make a voting system?",
+  "How do I create a survey maker?",
+  "How can I make a data visualization tool?",
+  "How do I create a family tree maker?",
+  "How can I make a budget tracker?",
+  "How do I create a meal planner?",
+  "How can I make a travel planner?",
+  "How do I create a movie database?",
+  "What's next?"
+];
+
 
 // --- Interfaces (Fully Typed) ---
 interface Message {
@@ -147,6 +367,34 @@ const ScratchChatbot: React.FC = () => {
   
   const { saveToStorage, loadFromStorage } = useLocalStorage();
   const apiKey = useMemo(() => import.meta.env.VITE_GEMINI_API_KEY || '', []);
+  // Add to your state variables in ScratchChatbot component
+const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+
+
+  // Add this useEffect after your existing useEffects
+useEffect(() => {
+  if (inputText.trim()) {
+    const filtered = SUGGESTION_PROMPTS.filter(suggestion =>
+      suggestion.toLowerCase().includes(inputText.toLowerCase())
+    ).slice(0, 6); // Limit to 6 suggestions
+    setFilteredSuggestions(filtered);
+    setShowSuggestions(filtered.length > 0);
+  } else {
+    // Show random suggestions when input is empty and focused
+    const randomSuggestions = SUGGESTION_PROMPTS
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 6);
+    setFilteredSuggestions(randomSuggestions);
+    setShowSuggestions(false); // Don't show by default, only on focus
+  }
+}, [inputText]);
+
+// Add this callback function
+const handleSuggestionClick = useCallback((suggestion: string) => {
+  setInputText(suggestion);
+  setShowSuggestions(false);
+}, []);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -550,28 +798,50 @@ ${conversationHistory}
           </div>
         )}
         
-        <div className="bg-white/80 backdrop-blur-sm border-t p-4">
-          <div className="flex gap-2">
-            <input 
-              type="text" 
-              value={inputText} 
-              onChange={(e) => setInputText(e.target.value)} 
-              onKeyPress={handleKeyPress}
-              placeholder={apiKey ? "Ask about Scratch..." : "API key not configured"} 
-              className="flex-1 px-4 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 transition" 
-              disabled={isTyping || !apiKey}
-              maxLength={1000}
-            />
-            <button 
-              onClick={handleSend} 
-              disabled={!inputText.trim() || isTyping || !apiKey} 
-              className="p-3 bg-orange-500 text-white rounded-full transition-colors hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed"
-              aria-label="Send message"
-            >
-              <Send className="w-5 h-5" />
-            </button>
-          </div>
+<div className="bg-white/80 backdrop-blur-sm border-t p-4">
+  <div className="relative">
+    {/* Suggestions dropdown */}
+    {showSuggestions && filteredSuggestions.length > 0 && (
+      <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto z-10">
+        <div className="p-2 border-b bg-gray-50 text-xs font-medium text-gray-600">
+          💡 Suggestions
         </div>
+        {filteredSuggestions.map((suggestion, index) => (
+          <button
+            key={index}
+            onClick={() => handleSuggestionClick(suggestion)}
+            className="w-full text-left px-3 py-2 text-sm hover:bg-orange-50 hover:text-orange-700 transition-colors border-b last:border-b-0 border-gray-100"
+          >
+            {suggestion}
+          </button>
+        ))}
+      </div>
+    )}
+    
+    <div className="flex gap-2">
+      <input 
+        type="text" 
+        value={inputText} 
+        onChange={(e) => setInputText(e.target.value)} 
+        onKeyPress={handleKeyPress}
+        onFocus={() => setShowSuggestions(filteredSuggestions.length > 0 || inputText.trim() === '')}
+        onBlur={() => setTimeout(() => setShowSuggestions(false), 150)} // Delay to allow suggestion clicks
+        placeholder={apiKey ? "Ask about Scratch..." : "API key not configured"} 
+        className="flex-1 px-4 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 transition" 
+        disabled={isTyping || !apiKey}
+        maxLength={1000}
+      />
+      <button 
+        onClick={handleSend} 
+        disabled={!inputText.trim() || isTyping || !apiKey} 
+        className="p-3 bg-orange-500 text-white rounded-full transition-colors hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed"
+        aria-label="Send message"
+      >
+        <Send className="w-5 h-5" />
+      </button>
+    </div>
+  </div>
+</div>
       </div>
     </div>
   );
