@@ -8,6 +8,129 @@
   </head>
   <body>
     <div id="root"></div>
+<script>
+// Read URL parameters sent from parent
+function getUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return {
+        screenSize: urlParams.get('screenSize'),
+        width: parseInt(urlParams.get('width')) || 600,
+        height: parseInt(urlParams.get('height')) || 550,
+        isMobile: urlParams.get('isMobile') === 'true',
+        isTablet: urlParams.get('isTablet') === 'true'
+    };
+}
+
+// Apply responsive styles based on parent window size
+function applyResponsiveStyles() {
+    const params = getUrlParams();
+    const { screenSize, width, height, isMobile, isTablet } = params;
+    
+    console.log('Received params from parent:', params);
+    
+    // Create responsive stylesheet
+    const styleEl = document.createElement('style');
+    styleEl.id = 'parent-responsive-styles';
+    
+    let css = `
+        html, body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+    `;
+    
+    if (isMobile) {
+        css += `
+            body {
+                font-size: 14px;
+                padding: 8px;
+            }
+            
+            input, textarea, button {
+                font-size: 14px !important;
+                padding: 8px !important;
+                min-height: 44px; /* Better touch targets */
+            }
+            
+            .chat-container, .main-container {
+                max-height: ${height - 100}px;
+                overflow-y: auto;
+            }
+            
+            .message {
+                margin-bottom: 8px;
+                padding: 8px;
+            }
+            
+            h1, h2, h3 {
+                font-size: 1.2em;
+                margin: 8px 0;
+            }
+        `;
+    } else if (isTablet) {
+        css += `
+            body {
+                font-size: 15px;
+                padding: 10px;
+            }
+            
+            input, textarea, button {
+                font-size: 15px !important;
+                padding: 10px !important;
+            }
+            
+            .chat-container, .main-container {
+                max-height: ${height - 80}px;
+                overflow-y: auto;
+            }
+        `;
+    } else {
+        // Desktop styles
+        css += `
+            body {
+                font-size: 16px;
+                padding: 15px;
+            }
+            
+            .chat-container, .main-container {
+                max-height: ${height - 60}px;
+                overflow-y: auto;
+            }
+        `;
+    }
+    
+    styleEl.textContent = css;
+    document.head.appendChild(styleEl);
+    
+    // Add responsive class to body
+    document.body.className = `${screenSize}-view`;
+}
+
+// Apply styles when page loads
+document.addEventListener('DOMContentLoaded', applyResponsiveStyles);
+
+// Also apply immediately in case DOM is already loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyResponsiveStyles);
+} else {
+    applyResponsiveStyles();
+}
+
+// Add viewport meta tag if it doesn't exist
+if (!document.querySelector('meta[name="viewport"]')) {
+    const meta = document.createElement('meta');
+    meta.name = 'viewport';
+    meta.content = 'width=device-width, initial-scale=1.0, user-scalable=no';
+    document.head.appendChild(meta);
+}
+</script>
     <script type="module" src="/src/main.tsx"></script>
+
   </body>
 </html>
